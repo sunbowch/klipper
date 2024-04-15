@@ -118,7 +118,7 @@ class TemperatureFan:
 ######################################################################
 
 class ControlBangBang:
-    def __init__(self, temperature_fan):
+    def __init__(self, temperature_fan, config):
         self.temperature_fan = temperature_fan
         self.heating = False
     def temperature_callback(self, read_time, temp):
