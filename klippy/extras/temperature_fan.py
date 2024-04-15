@@ -120,7 +120,6 @@ class TemperatureFan:
 class ControlBangBang:
     def __init__(self, temperature_fan):
         self.temperature_fan = temperature_fan
-        self.max_delta = config.getfloat('max_delta', 2.0, above=0.)
         self.heating = False
     def temperature_callback(self, read_time, temp):
         current_temp, target_temp = self.temperature_fan.get_temp(read_time)
