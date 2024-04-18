@@ -6324,10 +6324,11 @@ information.</p>
 #   be provided when the PID control algorithm is enabled and must be
 #   negative as &quot;e&quot; &lt; 0 when the fan must be powered on.
 #   fan_pwm is bounded to stay within min_speed &lt;-&gt; max_speed range.
-#   fans stops if fan_pwm is below min_speed and e is &gt;= 0, meaning
-#   that the target_temperature has been reached.
+#   fans stops if fan_pwm is below min_speed and e is &gt;= max_delta,
+#   meaning that the target_temperature has been reached with a margin.
 #   fan starts when measured_temperature is greater than target_
-#   temperature + max_delta
+#   temperature + max_delta. max_delta can be tuned to avoid rapid
+#   On-Off oscillations of the fan near the reference temperature.
 #pid_deriv_time: 2.0
 #   A time value (in seconds) over which temperature measurements will
 #   be smoothed when using the PID control algorithm. This may reduce
