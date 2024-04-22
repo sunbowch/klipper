@@ -156,6 +156,7 @@ class ControlPID:
         self.prev_temp_time = 0.
         self.prev_temp_deriv = 0.
         self.prev_temp_integ = 0.
+        self.fanspd = 0
     def temperature_callback(self, read_time, temp):
         current_temp, target_temp = self.temperature_fan.get_temp(read_time)
         time_diff = read_time - self.prev_temp_time
@@ -176,12 +177,9 @@ class ControlPID:
                          min(self.temperature_fan.get_max_speed(), co))
         # stop and go conditions for the fan
         if temp_err > self.temperature_fan.get_max_delta():
-            fanspd = 0
+            self.fanspd = 0
         elif -temp_err > self.temperature_fan.get_max_delta():
-            fanspd = bounded_co
-        # Init fanspd if not defined by above conditions
-        elif 'fanspd' not in locals():
-            fanspd = bounded_co
+            self.fanspd = bounded_co
         self.temperature_fan.set_speed(read_time, fanspd)
         # Store state for next measurement
         self.prev_temp = temp
