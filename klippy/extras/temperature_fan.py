@@ -180,7 +180,7 @@ class ControlPID:
             self.fanspd = 0
         elif -temp_err > self.temperature_fan.get_max_delta():
             self.fanspd = bounded_co
-        self.temperature_fan.set_speed(read_time, fanspd)
+        self.temperature_fan.set_speed(read_time, self.fanspd)
         # Store state for next measurement
         self.prev_temp = temp
         self.prev_temp_time = read_time
