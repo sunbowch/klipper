@@ -36,6 +36,7 @@ class TemperatureFan:
             minval=self.min_temp, maxval=self.max_temp)
         self.target_temp = self.target_temp_conf
         self.max_delta = config.getfloat('max_delta', 2.0, above=0.)
+        self.fanspd = 0
         algos = {'watermark': ControlBangBang, 'pid': ControlPID}
         algo = config.getchoice('control', algos)
         self.control = algo(self, config)
@@ -176,13 +177,10 @@ class ControlPID:
                          min(self.temperature_fan.get_max_speed(), co))
         # stop and go conditions for the fan
         if temp_err > self.temperature_fan.get_max_delta():
-            fanspd = 0
+            self.fanspd = 0
         elif -temp_err > self.temperature_fan.get_max_delta():
-            fanspd = bounded_co
-        # Init fanspd if not defined by above conditions
-        elif 'fanspd' not in locals():
-            fanspd = bounded_co
-        self.temperature_fan.set_speed(read_time, fanspd)
+            self.fanspd = bounded_co
+        self.temperature_fan.set_speed(read_time, self.fanspd)
         # Store state for next measurement
         self.prev_temp = temp
         self.prev_temp_time = read_time
