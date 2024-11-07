@@ -48,7 +48,7 @@ class TemperatureFan:
             self.cmd_SET_TEMPERATURE_FAN_TARGET,
             desc=self.cmd_SET_TEMPERATURE_FAN_TARGET_help)
 
-    def set_speed(self, read_time, value):
+    def set_tf_speed(self, read_time, value):
         if value <= 0.:
             value = 0.
         elif value < self.min_speed:
@@ -62,7 +62,7 @@ class TemperatureFan:
         speed_time = read_time + self.speed_delay
         self.next_speed_time = speed_time + 0.75 * MAX_FAN_TIME
         self.last_speed_value = value
-        self.fan.set_speed(speed_time, value)
+        self.fan.set_speed(value, speed_time)
     def temperature_callback(self, read_time, temp):
         self.last_temp = temp
         self.control.temperature_callback(read_time, temp)
@@ -131,10 +131,10 @@ class ControlBangBang:
               and temp <= target_temp-self.temperature_fan.get_max_delta()):
             self.heating = True
         if self.heating:
-            self.temperature_fan.set_speed(read_time, 0.)
+            self.temperature_fan.set_tf_speed(read_time, 0.)
         else:
-            self.temperature_fan.set_speed(read_time,
-                                           self.temperature_fan.get_max_speed())
+            self.temperature_fan.set_tf_speed(
+                read_time, self.temperature_fan.get_max_speed())
 
 ######################################################################
 # Proportional Integral Derivative (PID) control algo
@@ -157,6 +157,7 @@ class ControlPID:
         self.prev_temp_time = 0.
         self.prev_temp_deriv = 0.
         self.prev_temp_integ = 0.
+        self.fanspd = 0
     def temperature_callback(self, read_time, temp):
         current_temp, target_temp = self.temperature_fan.get_temp(read_time)
         time_diff = read_time - self.prev_temp_time
