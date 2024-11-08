@@ -354,8 +354,8 @@ class TMCStallguardDump:
         self.samples = []
         gcmd.respond_info(
             "Writing raw stallguard data to %s file" % (filename,))
-        
-        
+
+
 ######################################################################
 # G-Code command helpers
 ######################################################################
