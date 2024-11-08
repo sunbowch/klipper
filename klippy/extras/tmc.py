@@ -337,7 +337,26 @@ class TMCStallguardDump:
         write_proc.daemon = True
         write_proc.start()
         
-    
+    cmd_MEASURE_STALLGUARD_help = "Record TMC stepper driver stallguard values"
+    def cmd_MEASURE_STALLGUARD(self, gcmd):
+        if not self.record_data:
+            self.record_data = True
+            self.batch_bulk.add_client(self._handle_batch)
+            gcmd.respond_info("stallguard measurements started")
+            logging.info("Start MEASURE_STALLGUARD %s", self.name)
+            return
+        # End measurments
+        name = gcmd.get("NAME", time.strftime("%Y%m%d_%H%M%S"))
+        if not name.replace("-", "").replace("_", "").isalnum():
+            raise gcmd.error("Invalid NAME parameter")
+        self.record_data = False
+        filename = "/tmp/%s-%s.csv" % (self.stepper_name, name)
+        self._write_to_file(filename)
+        self.samples = []
+        gcmd.respond_info(
+            "Writing raw stallguard data to %s file" % (filename,))
+
+
 ######################################################################
 # G-Code command helpers
 ######################################################################
@@ -350,6 +369,7 @@ class TMCCommandHelper:
         self.mcu_tmc = mcu_tmc
         self.current_helper = current_helper
         self.echeck_helper = TMCErrorCheck(config, mcu_tmc)
+        self.record_helper = TMCStallguardDump(config, mcu_tmc)
         self.fields = mcu_tmc.get_fields()
         self.read_registers = self.read_translate = None
         self.toff = None
@@ -572,27 +592,6 @@ class TMCCommandHelper:
                 if self.read_translate is not None:
                     reg_name, val = self.read_translate(reg_name, val)
                 gcmd.respond_info(self.fields.pretty_format(reg_name, val))
-                
-    cmd_MEASURE_STALLGUARD_help = "Record TMC stepper driver stallguard values"
-    def cmd_MEASURE_STALLGUARD(self, gcmd):
-        if not self.record_data:
-            self.record_data = True
-            self.batch_bulk.add_client(self._handle_batch)
-            gcmd.respond_info("stallguard measurements started")
-            logging.info("Start MEASURE_STALLGUARD %s", self.name)
-            return
-        # End measurments
-        name = gcmd.get("NAME", time.strftime("%Y%m%d_%H%M%S"))
-        if not name.replace("-", "").replace("_", "").isalnum():
-            raise gcmd.error("Invalid NAME parameter")
-        self.record_data = False
-        filename = "/tmp/%s-%s.csv" % (self.stepper_name, name)
-        self._write_to_file(filename)
-        self.samples = []
-        gcmd.respond_info(
-            "Writing raw stallguard data to %s file" % (filename,))
-
-
 
 
 ######################################################################
